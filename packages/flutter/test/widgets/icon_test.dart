@@ -394,6 +394,39 @@ void main() {
     expect(richText.text.style?.foreground?.blendMode, BlendMode.clear);
   });
 
+  testWidgets('Icon opacity: standalone, theme fallback, and override behavior', (
+    WidgetTester tester,
+  ) async {
+    Widget buildIcon({Color? color, double? opacity, IconThemeData? theme}) {
+      final Icon icon = Icon(
+        const IconData(0xd0a0, fontFamily: 'Arial'),
+        color: color,
+        opacity: opacity,
+      );
+
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: theme != null ? IconTheme(data: theme, child: icon) : icon,
+      );
+    }
+
+    await tester.pumpWidget(buildIcon(color: const Color(0xFF0000FF), opacity: 0.3));
+
+    final RichText text1 = tester.widget(find.byType(RichText));
+    expect(text1.text.style!.color, const Color(0xFF0000FF).withOpacity(0.3));
+
+    await tester.pumpWidget(buildIcon(color: const Color(0x800000FF), opacity: 0.3));
+
+    final RichText text2 = tester.widget(find.byType(RichText));
+    expect(text2.text.style!.color, const Color(0xFF0000FF).withOpacity(0.3 * 0.5));
+
+    const IconThemeData theme = IconThemeData(color: Color(0x800000FF), opacity: 0.5);
+    await tester.pumpWidget(buildIcon(theme: theme, color: const Color(0x800000FF), opacity: 0.3));
+
+    final RichText text3 = tester.widget(find.byType(RichText));
+    expect(text3.text.style!.color, const Color(0xFF0000FF).withOpacity(0.3 * 0.5));
+  });
+
   test('Throws if given invalid values', () {
     expect(() => Icon(Icons.abc, fill: -0.1), throwsAssertionError);
     expect(() => Icon(Icons.abc, fill: 1.1), throwsAssertionError);

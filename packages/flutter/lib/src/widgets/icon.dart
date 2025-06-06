@@ -82,6 +82,7 @@ class Icon extends StatelessWidget {
     this.grade,
     this.opticalSize,
     this.color,
+    this.opacity,
     this.shadows,
     this.semanticLabel,
     this.textDirection,
@@ -90,7 +91,8 @@ class Icon extends StatelessWidget {
     this.fontWeight,
   }) : assert(fill == null || (0.0 <= fill && fill <= 1.0)),
        assert(weight == null || (0.0 < weight)),
-       assert(opticalSize == null || (0.0 < opticalSize));
+       assert(opticalSize == null || (0.0 < opticalSize)),
+       assert(opacity == null || (0.0 <= opacity && opacity <= 1.0));
 
   /// The icon to display. The available icons are described in [Icons].
   ///
@@ -204,6 +206,30 @@ class Icon extends StatelessWidget {
   /// {@end-tool}
   final Color? color;
 
+  /// The opacity to apply to the icon, from 0.0 (fully transparent) to 1.0 (fully opaque).
+  ///
+  /// If non-null, this value is multiplied with the [Color.opacity] value of [color] to determine
+  /// the final effective opacity. If null, it falls back to the nearest [IconThemeData.opacity].
+  ///
+  /// This provides fine-grained control of transparency while respecting the icon’s color alpha.
+  ///
+  /// {@tool snippet}
+  /// This example shows an icon with 50% custom opacity and a semi-transparent color:
+  ///
+  /// ```dart
+  /// Icon(
+  ///   Icons.favorite,
+  ///   color: Colors.red.withOpacity(0.8),
+  ///   opacity: 0.5, // final opacity: 0.8 * 0.5 = 0.4
+  /// )
+  /// ```
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///  * [IconThemeData.opacity], the fallback if this property is null.
+  ///  * [Icon.color], whose alpha value is combined with this [opacity].
+  final double? opacity;
+
   /// A list of [Shadow]s that will be painted underneath the icon.
   ///
   /// Multiple shadows are supported to replicate lighting from multiple light
@@ -288,7 +314,7 @@ class Icon extends StatelessWidget {
       return Semantics(label: semanticLabel, child: SizedBox(width: iconSize, height: iconSize));
     }
 
-    final double iconOpacity = iconTheme.opacity ?? 1.0;
+    final double iconOpacity = opacity ?? iconTheme.opacity ?? 1.0;
     Color? iconColor = color ?? iconTheme.color!;
     Paint? foreground;
     if (iconOpacity != 1.0) {
